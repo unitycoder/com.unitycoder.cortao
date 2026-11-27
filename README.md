@@ -236,3 +236,9 @@ The CORTAO algorithm, reference shaders and lookup tables are based on the work 
 - Unity port repository: [unitycoder/com.unitycoder.cortao](https://github.com/unitycoder/com.unitycoder.cortao)
 
 See [LICENSE.md](LICENSE.md) and [Third-Party Notices.txt](Third-Party%20Notices.txt) for the original license and attribution. This is an independent Unity port, not an official upstream release or a Unity Technologies product.
+
+### Images
+
+Debug view:
+<img width="2560" height="1400" alt="image" src="https://github.com/user-attachments/assets/9de1b59f-4bf7-41c4-8a37-d8bfe9ec15ae" />
+
