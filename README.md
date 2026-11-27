@@ -1,3 +1,5 @@
+<img src="https://img.shields.io/badge/VibeCoded-100%25-green" alt="AI Generated Content"/> *but manually tested over few days.. : )
+
 # CORTAO for Unity URP
 
 ## Installation
