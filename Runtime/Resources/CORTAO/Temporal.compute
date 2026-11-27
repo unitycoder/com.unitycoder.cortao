@@ -1,0 +1,235 @@
+#pragma kernel ResolveBentStereoBentArrayDebug CORTAO_TEMPORAL_BENT=1 CORTAO_STEREO_INPUT=1 CORTAO_BENT_ARRAY=1 CORTAO_REJECTION_DEBUG=1
+#pragma kernel ResolveBentStereoArrayBentArrayDebug CORTAO_TEMPORAL_BENT=1 CORTAO_STEREO_INPUT=1 CORTAO_ARRAY_OUTPUT=1 CORTAO_BENT_ARRAY=1 CORTAO_REJECTION_DEBUG=1
+#pragma kernel ResolveStereoArrayDebug CORTAO_STEREO_INPUT=1 CORTAO_ARRAY_OUTPUT=1 CORTAO_REJECTION_DEBUG=1
+#pragma kernel ResolveBentStereoArrayDebug CORTAO_TEMPORAL_BENT=1 CORTAO_STEREO_INPUT=1 CORTAO_ARRAY_OUTPUT=1 CORTAO_REJECTION_DEBUG=1
+#pragma kernel ResolveStereoDebug CORTAO_STEREO_INPUT=1 CORTAO_REJECTION_DEBUG=1
+#pragma kernel ResolveBentStereoDebug CORTAO_TEMPORAL_BENT=1 CORTAO_STEREO_INPUT=1 CORTAO_REJECTION_DEBUG=1
+#pragma kernel ResolveDebug CORTAO_REJECTION_DEBUG=1
+#pragma kernel ResolveBentDebug CORTAO_TEMPORAL_BENT=1 CORTAO_REJECTION_DEBUG=1
+#pragma kernel ResolveBentStereoBentArray CORTAO_TEMPORAL_BENT=1 CORTAO_STEREO_INPUT=1 CORTAO_BENT_ARRAY=1
+#pragma kernel ResolveBentStereoArrayBentArray CORTAO_TEMPORAL_BENT=1 CORTAO_STEREO_INPUT=1 CORTAO_ARRAY_OUTPUT=1 CORTAO_BENT_ARRAY=1
+#pragma kernel ResolveStereoArray CORTAO_STEREO_INPUT=1 CORTAO_ARRAY_OUTPUT=1
+#pragma kernel ResolveBentStereoArray CORTAO_TEMPORAL_BENT=1 CORTAO_STEREO_INPUT=1 CORTAO_ARRAY_OUTPUT=1
+#pragma kernel ResolveStereo CORTAO_STEREO_INPUT=1
+#pragma kernel ResolveBentStereo CORTAO_TEMPORAL_BENT=1 CORTAO_STEREO_INPUT=1
+#pragma kernel Resolve
+#pragma kernel ResolveBent CORTAO_TEMPORAL_BENT=1
+#pragma multi_compile _ _GBUFFER_NORMALS_OCT
+#include "UnityNormals.hlsl"
+#include "CameraDepth.hlsl"
+Texture2D<float> _CurrentAO;
+Texture2D<float4> _History;
+Texture2D<float4> _EarlyMotion;
+int _UseEarlyMotion, _LowResolution;
+RWTexture2D<float4> _NextHistory;
+#if defined(CORTAO_ARRAY_OUTPUT)
+RWTexture2DArray<float> _FinalAO;
+#define AO_PIXEL(p) int3(p,_CORTAOEye)
+#else
+RWTexture2D<float> _FinalAO;
+#define AO_PIXEL(p) p
+#endif
+#if defined(CORTAO_REJECTION_DEBUG)
+RWTexture2D<float> _Rejection;
+int _HistoryDebugMode;
+#endif
+#if CORTAO_TEMPORAL_BENT
+Texture2D<float4> _CurrentBent, _HistoryBent;
+RWTexture2D<float4> _NextBent;
+#if defined(CORTAO_BENT_ARRAY)
+RWTexture2DArray<float4> _FinalBent;
+#define BENT_PIXEL(p) int3(p,_CORTAOEye)
+#else
+RWTexture2D<float4> _FinalBent;
+#define BENT_PIXEL(p) p
+#endif
+float3 SafeUnit(float3 v, float3 fallback) { return all(isfinite(v)) && dot(v,v)>1e-8 ? normalize(v) : fallback; }
+#endif
+float4x4 _InverseVP, _PreviousVP, _PreviousView, _InverseView;
+int _FullWidth, _FullHeight, _HistoryValid;
+int _PreviousWidth, _PreviousHeight;
+int _ValidatedBilinearHistory;
+float _HistoryResponse, _VarianceExpansion;
+float _HistoryWeight, _HistoryDepthThreshold, _HistoryNormalThreshold, _ClampExpansion;
+float2 ToNDC(float2 uv) {
+#if UNITY_UV_STARTS_AT_TOP
+    uv.y = 1-uv.y;
+#endif
+    return uv*2-1;
+}
+float2 ToUV(float2 ndc) {
+    float2 uv=ndc*0.5+0.5;
+#if UNITY_UV_STARTS_AT_TOP
+    uv.y=1-uv.y;
+#endif
+    return uv;
+}
+float3 WorldNormal(int2 p) { return normalize(mul((float3x3)_InverseView,ReadNormal(p))); }
+void Run(uint2 id) {
+    int2 size=int2(_FullWidth,_FullHeight), p=int2(id);
+    if(any(p>=size)) return;
+    // Match the representative full-resolution pixel used by Resolution.hlsl.
+    int2 sourceSize = size * (_LowResolution != 0 ? 2 : 1);
+    int2 sourcePixel = _LowResolution != 0 ? p * 2 + 1 : p;
+    float depth=ReadDepth(sourcePixel);
+#if UNITY_REVERSED_Z
+    bool sky=depth<=1e-7;
+    float clipZ=depth;
+#else
+    bool sky=depth>=0.9999999;
+    float clipZ=lerp(UNITY_NEAR_CLIP_VALUE,1,depth);
+#endif
+    if(sky) {
+        _FinalAO[AO_PIXEL(p)]=1; _NextHistory[p]=float4(1,0,0,0);
+#if defined(CORTAO_REJECTION_DEBUG)
+        _Rejection[p]=_HistoryDebugMode==1 ? 0 : 1;
+#endif
+#if CORTAO_TEMPORAL_BENT
+        _NextBent[p]=0; _FinalBent[BENT_PIXEL(p)]=float4(0.5,0.5,1,1);
+#endif
+        return;
+    }
+    float4 world=mul(_InverseVP,float4(ToNDC((sourcePixel+0.5)/sourceSize),clipZ,1));
+    world/=world.w;
+    float3 n=WorldNormal(sourcePixel);
+    float eyeZ=-mul(_View,world).z;
+    float rawCurrent=_CurrentAO.Load(int3(p,0));
+    float current=isfinite(rawCurrent) ? saturate(rawCurrent) : 1.0;
+    float result=current;
+#if defined(CORTAO_REJECTION_DEBUG)
+    float accepted=0, effectiveWeight=0;
+#endif
+#if CORTAO_TEMPORAL_BENT
+    float3 currentBent=SafeUnit(mul((float3x3)_InverseView,_CurrentBent.Load(int3(p,0)).xyz*2-1),n);
+    float3 resultBent=currentBent;
+#endif
+    if(_HistoryValid!=0) {
+        float4 prevClip=mul(_PreviousVP,world);
+        float2 uv=ToUV(prevClip.xy/max(prevClip.w,1e-6));
+        float expected=-mul(_PreviousView,world).z;
+        bool canReproject=prevClip.w>0;
+        if(_UseEarlyMotion!=0) {
+            float4 motion=_EarlyMotion.Load(int3(p,0));
+            if(motion.w>0.5) { uv=motion.xy; expected=motion.z; canReproject=true; }
+            else if(motion.w< -0.5) canReproject=false;
+        }
+        if(canReproject && expected>0 && all(uv>=0) && all(uv<1)) {
+            // Validate each contributing texel before interpolation. Never mix
+            // foreground/background history across a disocclusion boundary.
+            int2 previousSize=int2(_PreviousWidth,_PreviousHeight);
+            // Half-resolution representatives are offset by a quarter of a history texel.
+            float2 texel=uv*previousSize-0.5-(_LowResolution != 0 ? 0.25 : 0.0);
+            int2 basePixel=int2(floor(texel));
+            float2 fracPixel=frac(texel);
+            float sum=0, accumulated=0;
+#if CORTAO_TEMPORAL_BENT
+            float3 bentSum=0;
+            float bentWeight=0;
+#endif
+            int tapCount=_ValidatedBilinearHistory!=0 ? 4 : 1;
+            [loop] for(int tap=0;tap<tapCount;tap++) {
+                int2 offset=int2(tap&1,tap>>1);
+                int2 q=_ValidatedBilinearHistory!=0 ? basePixel+offset : int2(floor(texel+0.5));
+                if(any(q<0) || any(q>=previousSize)) continue;
+                float2 axisWeight=lerp(1-fracPixel,fracPixel,float2(offset));
+                float w=_ValidatedBilinearHistory!=0 ? axisWeight.x*axisWeight.y : 1;
+                if(w<=0.0) continue;
+                float4 old=_History.Load(int3(q,0));
+                if (!all(isfinite(old))) continue;
+                float3 oldN=UnpackNormalOctQuadEncode(old.zw);
+                if(old.y<=0 || abs(old.y-expected)>max(_HistoryDepthThreshold,expected*0.01) || dot(n,oldN)<_HistoryNormalThreshold) continue;
+                accumulated+=old.x*w;
+                sum+=w;
+#if CORTAO_TEMPORAL_BENT
+                float4 oldBent=_HistoryBent.Load(int3(q,0));
+                if(all(isfinite(oldBent)) && oldBent.w>0 && dot(oldBent.xyz,n)>0 && dot(oldBent.xyz,currentBent)>0) {
+                    float3 previousBent=SafeUnit(oldBent.xyz,currentBent);
+                    float bw=w*saturate(dot(previousBent,currentBent));
+                    bentSum+=previousBent*bw;
+                    bentWeight+=bw;
+                }
+#endif
+            }
+            if(sum>1e-5) {
+                float oldAO=accumulated/sum;
+                float lo=current, hi=current;
+                float neighborhoodSum=0, neighborhoodSquareSum=0, neighborhoodCount=0;
+                [unroll] for(int y=-1;y<=1;y++) [unroll] for(int x=-1;x<=1;x++) {
+                    float a=(x==0 && y==0) ? rawCurrent : _CurrentAO.Load(int3(clamp(p+int2(x,y),0,size-1),0));
+                    if (!isfinite(a)) continue;
+                    a=saturate(a);
+                    lo=min(lo,a); hi=max(hi,a);
+                    neighborhoodSum+=a; neighborhoodSquareSum+=a*a; neighborhoodCount+=1;
+                }
+                // A noisy single frame is not a reliable hard bound on a converged history.
+                // Reuse the existing taps; cap the added margin to limit ghosting.
+                float mean=neighborhoodSum/max(neighborhoodCount,1.0);
+                float variance=max(0.0,neighborhoodSquareSum/max(neighborhoodCount,1.0)-mean*mean);
+                float margin=_ClampExpansion+min(0.1,sqrt(variance)*saturate(_VarianceExpansion));
+                float clamped=clamp(oldAO,max(0.0,lo-margin),min(1.0,hi+margin));
+                float response=1-saturate(_HistoryResponse)*saturate(abs(oldAO-clamped)*4);
+                float blend=_HistoryWeight*saturate(sum)*response;
+                result=lerp(current,clamped,blend);
+#if defined(CORTAO_REJECTION_DEBUG)
+                accepted=saturate(sum);
+                effectiveWeight=saturate(blend);
+#endif
+#if CORTAO_TEMPORAL_BENT
+                if(bentWeight>1e-5) {
+                    float3 previousBent=SafeUnit(bentSum,currentBent);
+                    resultBent=SafeUnit(lerp(currentBent,previousBent,_HistoryWeight*saturate(bentWeight)*response),currentBent);
+                }
+#endif
+            }
+        }
+    }
+    result=isfinite(result) ? saturate(result) : current;
+    _FinalAO[AO_PIXEL(p)]=result;
+    _NextHistory[p]=float4(result,eyeZ,PackNormalOctQuadEncode(n));
+#if defined(CORTAO_REJECTION_DEBUG)
+    _Rejection[p]=_HistoryDebugMode==1 ? effectiveWeight : 1-accepted;
+#endif
+#if CORTAO_TEMPORAL_BENT
+    _NextBent[p]=float4(resultBent,1);
+    _FinalBent[BENT_PIXEL(p)]=float4(SafeUnit(mul((float3x3)_View,resultBent),ReadNormal(sourcePixel))*0.5+0.5,1);
+#endif
+}
+
+[numthreads(8,8,1)]
+void Resolve(uint2 id:SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void ResolveBent(uint2 id:SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void ResolveStereo(uint2 id:SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void ResolveBentStereo(uint2 id:SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void ResolveStereoArray(uint2 id:SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void ResolveBentStereoArray(uint2 id:SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void ResolveBentStereoBentArray(uint2 id:SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void ResolveBentStereoArrayBentArray(uint2 id:SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void ResolveBentStereoBentArrayDebug(uint2 id:SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void ResolveBentStereoArrayBentArrayDebug(uint2 id:SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void ResolveStereoArrayDebug(uint2 id:SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void ResolveBentStereoArrayDebug(uint2 id:SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void ResolveStereoDebug(uint2 id:SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void ResolveBentStereoDebug(uint2 id:SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void ResolveDebug(uint2 id:SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void ResolveBentDebug(uint2 id:SV_DispatchThreadID) { Run(id); }

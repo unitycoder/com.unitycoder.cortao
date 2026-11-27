@@ -1,0 +1,8 @@
+Third-party software notice
+
+CORTAO Reference Implementation v1.0.3
+Copyright (c) 2026 Daniel Isheden
+Source: https://github.com/theagentd/CORTAO
+License: MIT
+
+The package includes adapted reference shaders and lookup tables. The full upstream license is reproduced in LICENSE.md. The Unity integration is a separate port and is not represented as an official upstream release.

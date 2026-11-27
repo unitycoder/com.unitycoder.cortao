@@ -1,0 +1,53 @@
+#pragma kernel PrepassStereo CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel PrepassOrthoStereo CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel Prepass CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel PrepassOrtho CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma multi_compile _ _GBUFFER_NORMALS_OCT
+#define CORTAO_HLSL 1
+#include "../../Shaders/Reference/CORTAOPrepass.h"
+#include "UnityNormals.hlsl"
+#include "CameraDepth.hlsl"
+int _PackedResolution, _Seed, _MipCount;
+#include "Resolution.hlsl"
+float _DepthScale, _DepthOffset;
+RWTexture2D<uint> _Mip0;
+RWTexture2D<uint> _Mip1;
+RWTexture2D<uint> _Mip2;
+RWTexture2D<uint> _Mip3;
+RWTexture2D<uint> _Mip4;
+RWTexture2D<uint> _Mip5;
+RWTexture2D<uint> _Mip6;
+RWTexture2D<uint> _Mip7;
+float cortao_loadDepth(int2 p) { return ReadDepth(FullPixel(p)); }
+float3 cortao_loadNormal(int2 p) { return ReadNormal(FullPixel(p)); }
+void cortao_writePackedData(int2 p, int level, uint data)
+{
+    switch(level) {
+        case 0: _Mip0[p] = data; break;
+        case 1: _Mip1[p] = data; break;
+        case 2: _Mip2[p] = data; break;
+        case 3: _Mip3[p] = data; break;
+        case 4: _Mip4[p] = data; break;
+        case 5: _Mip5[p] = data; break;
+        case 6: _Mip6[p] = data; break;
+        case 7: _Mip7[p] = data; break;
+    }
+}
+void RunPrepass(uint2 p)
+{
+    CORTAOPrepassParameters a = (CORTAOPrepassParameters)0;
+    a.packedResolution = _PackedResolution; a.randomSeed = _Seed;
+    a.depthScale = _DepthScale; a.depthOffset = _DepthOffset; a.mipCount = _MipCount;
+    cortao_prepass(p,a);
+}
+
+[numthreads(8,8,1)]
+void Prepass(uint2 p : SV_DispatchThreadID) { RunPrepass(p); }
+[numthreads(8,8,1)]
+void PrepassOrtho(uint2 p : SV_DispatchThreadID) { RunPrepass(p); }
+
+[numthreads(8,8,1)]
+void PrepassStereo(uint2 p : SV_DispatchThreadID) { RunPrepass(p); }
+
+[numthreads(8,8,1)]
+void PrepassOrthoStereo(uint2 p : SV_DispatchThreadID) { RunPrepass(p); }

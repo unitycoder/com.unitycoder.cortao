@@ -1,0 +1,87 @@
+#pragma kernel UpsampleStereoArray CORTAO_STEREO_INPUT=1 CORTAO_ARRAY_OUTPUT=1
+#pragma kernel UpsampleOrthoStereoArray CORTAO_ORTHO=1 CORTAO_STEREO_INPUT=1 CORTAO_ARRAY_OUTPUT=1
+#pragma kernel UpsampleStereo CORTAO_STEREO_INPUT=1
+#pragma kernel UpsampleOrthoStereo CORTAO_ORTHO=1 CORTAO_STEREO_INPUT=1
+#pragma kernel Upsample
+#pragma kernel UpsampleOrtho CORTAO_ORTHO=1
+#pragma multi_compile _ _GBUFFER_NORMALS_OCT
+#include "UnityNormals.hlsl"
+int _PackedResolution;
+#include "Resolution.hlsl"
+#include "CameraDepth.hlsl"
+Texture2D<float> _RawAO;
+#if defined(CORTAO_ARRAY_OUTPUT)
+RWTexture2DArray<float> _FinalAO;
+#define AO_PIXEL(p) int3(p,_CORTAOEye)
+#else
+RWTexture2D<float> _FinalAO;
+#define AO_PIXEL(p) p
+#endif
+float _DepthScale, _DepthOffset, _DepthThreshold, _NormalPower;
+float EyeDepth(float d) {
+#if CORTAO_ORTHO
+    return d*_DepthScale+_DepthOffset;
+#else
+    return rcp(max(d*_DepthScale+_DepthOffset,1e-8));
+#endif
+}
+bool Sky(float d) {
+#if UNITY_REVERSED_Z
+    return d <= 0.0000001;
+#else
+    return d >= 0.9999999;
+#endif
+}
+void Run(uint2 id)
+{
+    int2 p = int2(id);
+    if(any(p>=FullSize())) return;
+    float d = ReadDepth(p);
+    if(Sky(d)) { _FinalAO[AO_PIXEL(p)]=1; return; }
+    float z=EyeDepth(d);
+    float3 n=ReadNormal(p);
+    float2 q=(float2(p)+0.5)*TraceSize()/FullSize()-0.5;
+    int2 baseP=(int2)floor(q);
+    float sum=0, weight=0;
+    float tolerance=max(_DepthThreshold,z*0.01);
+    // A 3x3 neighborhood provides extra candidates near silhouettes.
+    [unroll] for(int y=-1;y<=1;y++)
+    [unroll] for(int x=-1;x<=1;x++) {
+        int2 t=baseP+int2(x,y);
+        if(any(t<0)||any(t>=TraceSize())) continue;
+        int2 f=FullPixel(t);
+        float sd=ReadDepth(f);
+        if(Sky(sd)) continue;
+        float dz=abs(EyeDepth(sd)-z)/tolerance;
+        float2 delta=float2(t)-q;
+        float depthSpatialWeight=exp2(-2*dot(delta,delta)-4*dz*dz);
+        // Zero-weight candidates cannot contribute to the reconstruction.
+        // Retain FP32 weights and the original filter equation.
+        if(depthSpatialWeight==0.0) continue;
+        float nw=pow(saturate(dot(n,ReadNormal(f))),_NormalPower);
+        float w=depthSpatialWeight*nw;
+        if(w==0.0) continue;
+        float ao=_RawAO.Load(int3(t,0));
+        if (!isfinite(ao) || !isfinite(w)) continue;
+        sum+=w*saturate(ao); weight+=w;
+    }
+    // Avoid importing occlusion from an unrelated surface if no sample matches.
+    _FinalAO[AO_PIXEL(p)]=weight>0.0001 ? saturate(sum/weight) : 1;
+}
+
+[numthreads(8,8,1)]
+void Upsample(uint2 id : SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void UpsampleOrtho(uint2 id : SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void UpsampleStereo(uint2 id : SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void UpsampleOrthoStereo(uint2 id : SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void UpsampleStereoArray(uint2 id : SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void UpsampleOrthoStereoArray(uint2 id : SV_DispatchThreadID) { Run(id); }

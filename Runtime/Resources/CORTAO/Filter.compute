@@ -1,0 +1,102 @@
+#pragma kernel DenoiseAO
+#pragma kernel FilterArray CORTAO_ARRAY_OUTPUT=1
+#pragma kernel Filter
+#define CORTAO_HLSL 1
+#define CORTAO_LARGE_FILTER 1
+#define CORTAO_FILTER_SYMMETRY 1
+#define CORTAO_WRITE_SKY_OUTPUT 1
+#include "../../Shaders/Reference/CORTAOFilterPass.h"
+Texture2D<uint> _Mip0;
+Texture2D<float> _RawAO;
+#if defined(CORTAO_ARRAY_OUTPUT)
+RWTexture2DArray<float> _FinalAO;
+#define AO_PIXEL(p) int3(p,_CORTAOEye)
+#else
+RWTexture2D<float> _FinalAO;
+#define AO_PIXEL(p) p
+#endif
+int _PackedResolution;
+int _CORTAOEye;
+float _DepthSensitivity, _NormalSensitivity, _Intensity;
+int2 Size() { return int2(_PackedResolution & 65535,(uint)_PackedResolution >> 16); }
+uint ReadPacked(int2 p) { return any(p<0)||any(p>=Size()) ? 0 : _Mip0.Load(int3(p,0)); }
+// Inspect IEEE 754 exponent bits to preserve NaN/Inf checks under fast math.
+bool IsFiniteAO(float value) { return (asuint(value) & 0x7f800000u) != 0x7f800000u; }
+float ReadAO(int2 p) {
+    if(any(p<0)||any(p>=Size())) return 1;
+    float ao = _RawAO.Load(int3(p,0));
+    return IsFiniteAO(ao) ? saturate(ao) : 1.0;
+}
+float ApplyIntensity(float ao) {
+    return _Intensity <= 0.0 ? 1.0 : pow(saturate(ao),_Intensity);
+}
+uint4 cortao_gatherPackedData(float2 uv,int2 offset)
+{
+    int2 p = (int2)round(uv*Size()) - 1 + offset;
+    return uint4(ReadPacked(p+int2(0,1)),ReadPacked(p+1),ReadPacked(p+int2(1,0)),ReadPacked(p));
+}
+float4 cortao_gatherSSAO(float2 uv,int2 offset)
+{
+    int2 p = (int2)round(uv*Size()) - 1 + offset;
+    return float4(ReadAO(p+int2(0,1)),ReadAO(p+1),ReadAO(p+int2(1,0)),ReadAO(p));
+}
+void cortao_writeFilterOutput(int2 p,float ao)
+{
+    if (!IsFiniteAO(ao)) ao = ReadAO(p);
+    _FinalAO[AO_PIXEL(p)] = ApplyIntensity(ao);
+}
+void RunFilter(uint2 id)
+{
+    int2 baseP = int2(id)*2;
+    if(any(baseP>=Size())) return;
+    CORTAOFilterPassParameters a = (CORTAOFilterPassParameters)0;
+    a.packedResolution = _PackedResolution; a.depthSensitivity = _DepthSensitivity;
+    a.normalSensitivity = _NormalSensitivity;
+    cortao_filterPass(id,a);
+}
+
+[numthreads(8,8,1)]
+void Filter(uint2 id : SV_DispatchThreadID) { RunFilter(id); }
+[numthreads(8,8,1)]
+void FilterArray(uint2 id : SV_DispatchThreadID) { RunFilter(id); }
+
+#if !defined(CORTAO_ARRAY_OUTPUT)
+// Optional scalar AO-only edge-aware, dilated 3x3 filter. Input already has
+// intensity applied; do not apply it again. Packed data is per-eye 2D.
+int _DenoiseStep;
+float _DenoiseStrength;
+[numthreads(8,8,1)]
+void DenoiseAO(uint2 id : SV_DispatchThreadID)
+{
+    int2 p=int2(id);
+    if(any(p>=Size())) return;
+    uint center=ReadPacked(p);
+    if(center==0u) { _FinalAO[AO_PIXEL(p)]=1.0; return; }
+    float a=ReadAO(p);
+    float z=max(cortao_unpackDepth(center),1e-6);
+    float2 n=float2(cortao_unpackNormalX(uint4(center,center,center,center)).x,cortao_unpackNormalY(uint4(center,center,center,center)).x);
+    float sum=4.0*a, squareSum=4.0*a*a, total=4.0;
+    [unroll] for(int dy=-1;dy<=1;dy++)
+    [unroll] for(int dx=-1;dx<=1;dx++)
+    {
+        if(dx==0 && dy==0) continue;
+        int2 q=p+int2(dx,dy)*_DenoiseStep;
+        uint samplePacked=ReadPacked(q);
+        if(samplePacked==0u) continue;
+        float dz=abs(cortao_unpackDepth(samplePacked)-z)/z;
+        float2 sn=float2(cortao_unpackNormalX(uint4(samplePacked,samplePacked,samplePacked,samplePacked)).x,cortao_unpackNormalY(uint4(samplePacked,samplePacked,samplePacked,samplePacked)).x);
+        float2 dn=(sn-n)/15.0;
+        float weight=(dx==0 || dy==0 ? 2.0 : 1.0)*exp2(-64.0*dz-16.0*dot(dn,dn));
+        if(weight==0.0) continue;
+        float sampleAO=ReadAO(q);
+        sum+=weight*sampleAO;
+        squareSum+=weight*sampleAO*sampleAO;
+        total+=weight;
+    }
+    float mean=sum/total;
+    float variance=max(0.0,squareSum/total-mean*mean);
+    // Favor filtering in locally varying regions; uniform areas stay unchanged.
+    float amount=saturate(_DenoiseStrength)*smoothstep(0.0,0.01,variance);
+    _FinalAO[AO_PIXEL(p)]=saturate(lerp(a,mean,amount));
+}
+#endif

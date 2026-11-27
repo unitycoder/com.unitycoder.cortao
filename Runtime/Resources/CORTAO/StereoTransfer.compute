@@ -1,0 +1,19 @@
+#pragma kernel CombineAO
+#pragma kernel CombineColor
+Texture2D<float> _LeftAO, _RightAO;
+Texture2D<float4> _LeftColor, _RightColor;
+RWTexture2DArray<float> _StereoAO;
+RWTexture2DArray<float4> _StereoColor;
+int _Width, _Height;
+[numthreads(8,8,1)]
+void CombineAO(uint3 p : SV_DispatchThreadID)
+{
+    if(p.x >= (uint)_Width || p.y >= (uint)_Height || p.z >= 2) return;
+    _StereoAO[p] = p.z == 0 ? _LeftAO.Load(int3(p.xy,0)) : _RightAO.Load(int3(p.xy,0));
+}
+[numthreads(8,8,1)]
+void CombineColor(uint3 p : SV_DispatchThreadID)
+{
+    if(p.x >= (uint)_Width || p.y >= (uint)_Height || p.z >= 2) return;
+    _StereoColor[p] = p.z == 0 ? _LeftColor.Load(int3(p.xy,0)) : _RightColor.Load(int3(p.xy,0));
+}

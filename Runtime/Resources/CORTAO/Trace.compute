@@ -1,0 +1,754 @@
+#pragma kernel TraceMinimalR8Stereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalR8OrthoStereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalBentR8Stereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalBentR8OrthoStereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalR16Stereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalR16OrthoStereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalBentR16Stereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalBentR16OrthoStereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalR32Stereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalR32OrthoStereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalBentR32Stereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalBentR32OrthoStereo CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMinimalR8 CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMinimalR8Ortho CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMinimalBentR8 CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMinimalBentR8Ortho CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMinimalR16 CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMinimalR16Ortho CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMinimalBentR16 CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMinimalBentR16Ortho CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMinimalR32 CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMinimalR32Ortho CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMinimalBentR32 CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMinimalBentR32Ortho CORTAO_SAMPLE_COUNT=4 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryLowR8Stereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowR8OrthoStereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowBentR8Stereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowBentR8OrthoStereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowR16Stereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowR16OrthoStereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowBentR16Stereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowBentR16OrthoStereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowR32Stereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowR32OrthoStereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowBentR32Stereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowBentR32OrthoStereo CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryLowR8 CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryLowR8Ortho CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryLowBentR8 CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryLowBentR8Ortho CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryLowR16 CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryLowR16Ortho CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryLowBentR16 CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryLowBentR16Ortho CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryLowR32 CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryLowR32Ortho CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryLowBentR32 CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryLowBentR32Ortho CORTAO_SAMPLE_COUNT=6 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMedium12R8Stereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12R8OrthoStereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12BentR8Stereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12BentR8OrthoStereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12R16Stereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12R16OrthoStereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12BentR16Stereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12BentR16OrthoStereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12R32Stereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12R32OrthoStereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12BentR32Stereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12BentR32OrthoStereo CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMedium12R8 CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMedium12R8Ortho CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMedium12BentR8 CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMedium12BentR8Ortho CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMedium12R16 CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMedium12R16Ortho CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMedium12BentR16 CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMedium12BentR16Ortho CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMedium12R32 CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMedium12R32Ortho CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMedium12BentR32 CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMedium12BentR32Ortho CORTAO_SAMPLE_COUNT=12 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryHighR8Stereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighR8OrthoStereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighBentR8Stereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighBentR8OrthoStereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighR16Stereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighR16OrthoStereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighBentR16Stereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighBentR16OrthoStereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighR32Stereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighR32OrthoStereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighBentR32Stereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighBentR32OrthoStereo CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceVeryHighR8 CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryHighR8Ortho CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryHighBentR8 CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryHighBentR8Ortho CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryHighR16 CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryHighR16Ortho CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryHighBentR16 CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryHighBentR16Ortho CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryHighR32 CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryHighR32Ortho CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceVeryHighBentR32 CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceVeryHighBentR32Ortho CORTAO_SAMPLE_COUNT=24 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceLowR8Stereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowR8OrthoStereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowBentR8Stereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowBentR8OrthoStereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumR8Stereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumR8OrthoStereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumBentR8Stereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumBentR8OrthoStereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighR8Stereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighR8OrthoStereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighBentR8Stereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighBentR8OrthoStereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowR16Stereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowR16OrthoStereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowBentR16Stereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowBentR16OrthoStereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumR16Stereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumR16OrthoStereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumBentR16Stereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumBentR16OrthoStereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighR16Stereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighR16OrthoStereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighBentR16Stereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighBentR16OrthoStereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowR32Stereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowR32OrthoStereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowBentR32Stereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowBentR32OrthoStereo CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumR32Stereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumR32OrthoStereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumBentR32Stereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceMediumBentR32OrthoStereo CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighR32Stereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighR32OrthoStereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighBentR32Stereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceHighBentR32OrthoStereo CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1 CORTAO_STEREO_INPUT=1
+#pragma kernel TraceLowR8 CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceLowR8Ortho CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceLowBentR8 CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceLowBentR8Ortho CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMediumR8 CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMediumR8Ortho CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMediumBentR8 CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMediumBentR8Ortho CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceHighR8 CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceHighR8Ortho CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceHighBentR8 CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceHighBentR8Ortho CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=8 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceLowR16 CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceLowR16Ortho CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceLowBentR16 CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceLowBentR16Ortho CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMediumR16 CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMediumR16Ortho CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMediumBentR16 CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMediumBentR16Ortho CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceHighR16 CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceHighR16Ortho CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceHighBentR16 CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceHighBentR16Ortho CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=16 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceLowR32 CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceLowR32Ortho CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceLowBentR32 CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceLowBentR32Ortho CORTAO_SAMPLE_COUNT=8 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMediumR32 CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMediumR32Ortho CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceMediumBentR32 CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceMediumBentR32Ortho CORTAO_SAMPLE_COUNT=16 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceHighR32 CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceHighR32Ortho CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=0 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma kernel TraceHighBentR32 CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_PERSPECTIVE_PROJECTION=1
+#pragma kernel TraceHighBentR32Ortho CORTAO_SAMPLE_COUNT=32 CORTAO_RAY_COUNT=32 CORTAO_WRITE_BENT=1 CORTAO_ORTHOGRAPHIC_PROJECTION=1
+#pragma multi_compile _ _GBUFFER_NORMALS_OCT
+#define CORTAO_HLSL 1
+#define CORTAO_OCCLUDER_LOOKUP_TABLE 1
+#include "../../Shaders/Reference/CORTAOMainPass.h"
+#include "UnityNormals.hlsl"
+Texture2D<uint> _Mip0;
+Texture2D<uint> _Mip1;
+Texture2D<uint> _Mip2;
+Texture2D<uint> _Mip3;
+Texture2D<uint> _Mip4;
+Texture2D<uint> _Mip5;
+Texture2D<uint> _Mip6;
+Texture2D<uint> _Mip7;
+StructuredBuffer<uint> _Lookup;
+RWTexture2D<float> _RawAO;
+#if CORTAO_WRITE_BENT
+RWTexture2D<float4> _Bent;
+#endif
+int _PackedResolution, _Seed, _MipCount;
+#include "Resolution.hlsl"
+float4 _LutSize;
+float4 _Unproject, _Project, _TraceParams, _TraceParams2;
+float4 _DistanceFade; // start, end, inverse range, enabled
+int _MipmappedPyramid;
+uint cortao_samplePackedData(float2 uv, float mip)
+{
+    if(any(uv < 0) || any(uv >= 1)) return 0;
+    int level = clamp((int)floor(mip + 0.5),0,_MipCount-1);
+    uint2 size = max(uint2(_PackedResolution & 65535, (uint)_PackedResolution >> 16) >> level,1u);
+    int2 p = min((int2)(uv*size),(int2)size-1);
+    if(_MipmappedPyramid != 0) return _Mip0.Load(int3(p,level));
+    switch(level) {
+        case 0: return _Mip0.Load(int3(p,0));
+        case 1: return _Mip1.Load(int3(p,0));
+        case 2: return _Mip2.Load(int3(p,0));
+        case 3: return _Mip3.Load(int3(p,0));
+        case 4: return _Mip4.Load(int3(p,0));
+        case 5: return _Mip5.Load(int3(p,0));
+        case 6: return _Mip6.Load(int3(p,0));
+        case 7: return _Mip7.Load(int3(p,0));
+    }
+    return 0;
+}
+float3 cortao_loadNormal(int2 p) { return ReadNormal(FullPixel(p)); }
+uint cortao_sampleOccluderLookupTable(float3 uv)
+{
+    int3 size = (int3)_LutSize.xyz;
+    int3 p = clamp((int3)floor(uv * size),0,size-1);
+    return _Lookup[p.x + size.x*(p.y + size.y*p.z)];
+}
+void cortao_writeResult(int2 p,float ao,float3 bent,float3x3 basis,uint bits)
+{
+    float visibility = ((asuint(ao) & 0x7f800000u) != 0x7f800000u) ? saturate(ao) : 1.0;
+    float fade = 1.0;
+    if (_DistanceFade.w > 0.5)
+    {
+        float depth = cortao_unpackDepth(_Mip0.Load(int3(p,0)));
+        fade = saturate((_DistanceFade.y-depth)*_DistanceFade.z);
+        fade = fade*fade*(3.0-2.0*fade);
+    }
+    _RawAO[p] = lerp(1.0,visibility,fade);
+#if CORTAO_WRITE_BENT
+    float3 n=all((asuint(bent) & 0x7f800000u) != 0x7f800000u) && dot(bent,bent)>1e-6 ? normalize(bent):cortao_loadNormal(p);
+    if (fade < 1.0)
+    {
+        float3 surface = cortao_loadNormal(p);
+        float3 mixed = lerp(surface,n,fade);
+        n = dot(mixed,mixed)>1e-6 ? normalize(mixed) : surface;
+    }
+    _Bent[p]=float4(n*0.5+0.5,1);
+#endif
+}
+void Run(uint2 p)
+{
+    uint2 size = uint2(_PackedResolution & 65535,(uint)_PackedResolution >> 16);
+    if(any(p >= size)) return;
+    uint center = _Mip0.Load(int3(p,0));
+    if(center == 0) { _RawAO[p] = 1;
+#if CORTAO_WRITE_BENT
+    _Bent[p]=float4(0.5,0.5,1,1);
+#endif
+    return; }
+    if (_DistanceFade.w > 0.5 && cortao_unpackDepth(center) >= _DistanceFade.y)
+    {
+        _RawAO[p] = 1.0;
+#if CORTAO_WRITE_BENT
+        _Bent[p] = float4(cortao_loadNormal(p)*0.5+0.5,1.0);
+#endif
+        return;
+    }
+    CORTAOMainPassParameters a = (CORTAOMainPassParameters)0;
+    a.packedResolution = _PackedResolution; a.randomSeed = _Seed;
+    a.unprojectParams = _Unproject; a.projectionParams = _Project;
+    a.normalBias = _TraceParams.x; a.radius = _TraceParams.y;
+    a.maxApparentCircleRadiusCoefficient = _TraceParams.z; a.mipBias = _TraceParams.w;
+    a.inverseMaxSlopeCompensation = _TraceParams2.x; a.backfaceThreshold = _TraceParams2.y;
+    a.backfaceBoost = _TraceParams2.z;
+    cortao_mainPass(p,a);
+}
+
+[numthreads(8,8,1)]
+void TraceLowR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceLowBentR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceMediumR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceMediumBentR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceHighR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceHighBentR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceLowR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceLowBentR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceMediumR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceMediumBentR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceHighR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceHighBentR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceLowR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceLowBentR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceMediumR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceMediumBentR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceHighR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+[numthreads(8,8,1)]
+void TraceHighBentR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowBentR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumBentR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighBentR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowBentR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumBentR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighBentR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowBentR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumBentR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighBentR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowBentR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowBentR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumBentR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumBentR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighBentR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighBentR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowBentR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowBentR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumBentR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumBentR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighBentR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighBentR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowBentR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceLowBentR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumBentR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMediumBentR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighBentR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceHighBentR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMinimalBentR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryLowBentR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R8(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R16(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R32(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12R32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceMedium12BentR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR8Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR8OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR16Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR16OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR32Stereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR32OrthoStereo(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR8(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR8Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR16(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR16Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR32(uint2 p : SV_DispatchThreadID) { Run(p); }
+
+[numthreads(8,8,1)]
+void TraceVeryHighBentR32Ortho(uint2 p : SV_DispatchThreadID) { Run(p); }

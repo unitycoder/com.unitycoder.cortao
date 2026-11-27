@@ -1,0 +1,84 @@
+#pragma kernel FilterBentStereoArray CORTAO_STEREO_INPUT=1 CORTAO_BENT_ARRAY=1
+#pragma kernel FilterBentOrthoStereoArray CORTAO_ORTHO=1 CORTAO_STEREO_INPUT=1 CORTAO_BENT_ARRAY=1
+#pragma kernel FilterBentStereo CORTAO_STEREO_INPUT=1
+#pragma kernel FilterBentOrthoStereo CORTAO_ORTHO=1 CORTAO_STEREO_INPUT=1
+#pragma kernel FilterBent
+#pragma kernel FilterBentOrtho CORTAO_ORTHO=1
+#pragma multi_compile _ _GBUFFER_NORMALS_OCT
+#include "UnityNormals.hlsl"
+int _PackedResolution;
+#include "Resolution.hlsl"
+#include "CameraDepth.hlsl"
+Texture2D<float4> _Bent;
+#if defined(CORTAO_BENT_ARRAY)
+RWTexture2DArray<float4> _FilteredBent;
+#define BENT_PIXEL(p) int3(p,_CORTAOEye)
+#else
+RWTexture2D<float4> _FilteredBent;
+#define BENT_PIXEL(p) p
+#endif
+float _DepthScale, _DepthOffset, _DepthThreshold, _NormalPower;
+float EyeDepth(float d) {
+#if CORTAO_ORTHO
+    return d*_DepthScale+_DepthOffset;
+#else
+    return rcp(max(d*_DepthScale+_DepthOffset,1e-8));
+#endif
+}
+bool Sky(float d) {
+#if UNITY_REVERSED_Z
+    return d <= 0.0000001;
+#else
+    return d >= 0.9999999;
+#endif
+}
+void Run(uint2 id)
+{
+    int2 p=int2(id);
+    if(any(p>=FullSize())) return;
+    float d=ReadDepth(p);
+    if(Sky(d)) { _FilteredBent[BENT_PIXEL(p)]=float4(0.5,0.5,1,1); return; }
+    float z=EyeDepth(d);
+    float3 n=ReadNormal(p), sum=0;
+    float2 q=(float2(p)+0.5)*TraceSize()/FullSize()-0.5;
+    int2 baseP=(int2)floor(q+0.5);
+    float tolerance=max(_DepthThreshold,z*0.01);
+    [unroll] for(int y=-1;y<=1;y++)
+    [unroll] for(int x=-1;x<=1;x++) {
+        int2 t=baseP+int2(x,y);
+        if(any(t<0)||any(t>=TraceSize())) continue;
+        int2 f=FullPixel(t);
+        float sd=ReadDepth(f);
+        if(Sky(sd)) continue;
+        float dz=abs(EyeDepth(sd)-z)/tolerance;
+        float2 delta=float2(t)-q;
+        float depthSpatialWeight=exp2(-dot(delta,delta)-4*dz*dz);
+        // Zero-weight candidates cannot contribute to the reconstruction.
+        // Retain FP32 weights and the original filter equation.
+        if(depthSpatialWeight==0.0) continue;
+        float nw=pow(saturate(dot(n,ReadNormal(f))),_NormalPower);
+        float w=depthSpatialWeight*nw;
+        if(w==0.0) continue;
+        float3 sampleBent=_Bent.Load(int3(t,0)).xyz*2-1;
+        if (!all(isfinite(sampleBent)) || !isfinite(w)) continue;
+        sum+=w*sampleBent;
+    }
+    float3 b=dot(sum,sum)>1e-8 ? normalize(sum) : n;
+    _FilteredBent[BENT_PIXEL(p)]=float4(b*0.5+0.5,1);
+}
+
+[numthreads(8,8,1)]
+void FilterBent(uint2 id : SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void FilterBentOrtho(uint2 id : SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void FilterBentStereo(uint2 id : SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void FilterBentOrthoStereo(uint2 id : SV_DispatchThreadID) { Run(id); }
+
+[numthreads(8,8,1)]
+void FilterBentStereoArray(uint2 id : SV_DispatchThreadID) { Run(id); }
+[numthreads(8,8,1)]
+void FilterBentOrthoStereoArray(uint2 id : SV_DispatchThreadID) { Run(id); }

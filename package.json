@@ -1,0 +1,17 @@
+{
+  "name": "com.unitycoder.cortao",
+  "version": "1.0.0-rc.30",
+  "displayName": "UnityCoder CORTAO",
+  "description": "Circular Occluder Ray-Traced Ambient Occlusion (CORTAO) for Unity URP Render Graph, based on the reference implementation v1.0.3.",
+  "unity": "6000.7",
+  "dependencies": {
+    "com.unity.render-pipelines.universal": "17.7.0"
+  },
+  "documentationUrl": "https://github.com/unitycoder/com.unitycoder.cortao#readme",
+  "changelogUrl": "https://github.com/unitycoder/com.unitycoder.cortao/releases",
+  "licensesUrl": "https://github.com/unitycoder/com.unitycoder.cortao/blob/main/LICENSE.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unitycoder/com.unitycoder.cortao.git"
+  }
+}
