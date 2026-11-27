@@ -1,25 +1,5 @@
 # CORTAO for Unity URP
 
-A free Unity integration of **Circular Occluder Ray-Traced Ambient Occlusion (CORTAO)**, a screen-space ambient occlusion technique developed by Daniel Isheden.
-
-This package brings the original CORTAO v1.0.3 tracing algorithm and lookup tables to Unity 6.7 URP, with native Render Graph integration, temporal accumulation, optional adaptive spatial denoising, quality presets, Volume overrides and experimental XR support.
-
-- [Download package (ZIP)](https://github.com/unitycoder/com.unitycoder.cortao/archive/refs/heads/main.zip)
-- [GitHub releases](https://github.com/unitycoder/com.unitycoder.cortao/releases)
-- [Report an issue](https://github.com/unitycoder/com.unitycoder.cortao/issues)
-- [Original CORTAO reference implementation](https://github.com/theagentd/CORTAO)
-
-## Requirements
-
-- Unity 6.7 (6000.7) and Universal Render Pipeline 17.7.0.
-- Render Graph enabled (Compatibility Mode disabled).
-- A GPU with compute shader support and the required storage texture formats.
-- Windows Direct3D 11 or 12 is the primary desktop target. Other graphics APIs and XR configurations require additional testing.
-
-CORTAO performs screen-space ray tracing in compute shaders. Hardware ray tracing, DXR and an RTX GPU are not required.
-
-**Status:** This is a development release (1.0.0-rc.30). Earlier revisions have been tested in Unity Deferred rendering; the current package and other rendering configurations still require validation. XR, dynamic resolution, motion tracking and APV extensions are experimental.
-
 ## Installation
 
 ### Unity Package Manager (recommended)
@@ -40,13 +20,24 @@ Alternatively, add this entry to the `dependencies` object in your project's `Pa
 "com.unitycoder.cortao": "https://github.com/unitycoder/com.unitycoder.cortao.git"
 ```
 
-### Manual installation
+### Info
 
-1. [Download the ZIP](https://github.com/unitycoder/com.unitycoder.cortao/archive/refs/heads/main.zip) and extract it.
-2. Copy or rename the extracted package folder to `Packages/com.unitycoder.cortao` in your Unity project. The `package.json` file must be directly inside that folder.
-3. Let Unity import the package and compile the shaders.
+A free Unity integration of **Circular Occluder Ray-Traced Ambient Occlusion (CORTAO)**, a screen-space ambient occlusion technique developed by Daniel Isheden.
+This package brings the original CORTAO v1.0.3 tracing algorithm and lookup tables to Unity 6.7 URP, with native Render Graph integration, temporal accumulation, optional adaptive spatial denoising, quality presets, Volume overrides and experimental XR support.
 
-When updating an embedded package, replace the complete package folder, including its `.meta` files. Do not install a second copy in `Assets`.
+- [Report an issue](https://github.com/unitycoder/com.unitycoder.cortao/issues)
+- [Original CORTAO reference implementation](https://github.com/theagentd/CORTAO)
+
+## Requirements
+
+- Unity 6.7 (6000.7) and Universal Render Pipeline 17.7.0.
+- Render Graph enabled (Compatibility Mode disabled).
+- A GPU with compute shader support and the required storage texture formats.
+- Windows Direct3D 11 or 12 is the primary desktop target. Other graphics APIs and XR configurations require additional testing.
+
+CORTAO performs screen-space ray tracing in compute shaders. Hardware ray tracing, DXR and an RTX GPU are not required.
+
+**Status:** This is a development release (1.0.0-rc.30). Earlier revisions have been tested in Unity Deferred rendering; the current package and other rendering configurations still require validation. XR, dynamic resolution, motion tracking and APV extensions are experimental.
 
 ## Quick start
 
